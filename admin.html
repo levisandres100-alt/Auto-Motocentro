@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Administración - La Casa del Repuesto</title>
+  <title>Panel de Administración - Auto-Motocentro</title>
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --primary: #e63946;
+      --primary: #ffd711;
       --dark: #1d3557;
       --light: #f1faee;
       --gray: #457b9d;
@@ -36,7 +36,7 @@
   <div class="container">
     <!-- PANTALLA DE LOGIN -->
     <div id="loginSection">
-      <h1>🚗 Admin Repuestos</h1>
+      <h1>🏎️ Panel de Administración</h1>
       <form id="loginForm">
         <div class="form-group">
           <label>Correo Electrónico:</label>
@@ -79,7 +79,16 @@
             <option value="sistemadefrenos">Sistema de Frenos</option>
             <option value="motorydistribuicion">Motor y Distribución</option>
             <option value="suspensionyshocks">Suspensión y Shocks</option>
-            <option value="baterias">Baterias</option>
+            <option value="baterias">Baterías</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Tipo de Vehículo / Aplica para:</label>
+          <select id="prodVehiculo" required>
+            <option value="carro">🚗 Automóvil / Carro</option>
+            <option value="moto">🏍️ Motocicleta</option>
+            <option value="ambos">🔄 Ambos / Universal</option>
           </select>
         </div>
 
@@ -105,9 +114,9 @@
   </div>
 
   <script>
-    // 🔑 DATOS DE SUPABASE 
-    const SUPABASE_URL = "https://xcjrwstjhbgwgdpcqwmm.supabase.co"; 
-    const SUPABASE_ANON_KEY = "sb_publishable_TGQTuTOiKITgHLHYoxA-MA_Bz9M94sv"; 
+    // DATOS DE SUPABASE 
+    const SUPABASE_URL = "https://exsegshoihdoofefjryt.supabase.co"; 
+    const SUPABASE_ANON_KEY = "sb_publishable_bN19uH5ODfBYvVTnW0oE7g_cFUqMaRN"; 
 
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -118,7 +127,7 @@
     const btnLogout = document.getElementById('btnLogout');
     const listaProductos = document.getElementById('listaProductos');
 
-    // 🔒 Verificar sesión
+    // Verificar sesión
     async function checkUser() {
       const { data: { session } } = await db.auth.getSession();
       if (session) {
@@ -132,7 +141,7 @@
     }
     checkUser();
 
-    // 🔑 Login
+    // Login
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('loginEmail').value;
@@ -147,13 +156,13 @@
       }
     });
 
-    // 🚪 Logout
+    // Logout
     btnLogout.addEventListener('click', async () => {
       await db.auth.signOut();
       checkUser();
     });
 
-    // 📤 Guardar Producto en BD
+    // Guardar Producto en BD
     productForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('btnGuardar');
@@ -164,6 +173,7 @@
       const precio = parseFloat(document.getElementById('prodPrecio').value);
       const stock = parseInt(document.getElementById('prodStock').value);
       const categoria = document.getElementById('prodCategoria').value;
+      const vehiculo = document.getElementById('prodVehiculo').value;
       const descripcion = document.getElementById('prodDescripcion').value;
       const fileInput = document.getElementById('prodImagen');
       const file = fileInput.files[0];
@@ -185,10 +195,10 @@
 
         const imagenUrl = urlData.publicUrl;
 
-        // Insertar en la tabla 'productos'
+        // Insertar en la tabla 'productos' (se agregó la columna vehiculo)
         const { error: dbError } = await db
           .from('productos')
-          .insert([{ nombre, precio, stock, categoria, descripcion, imagen_url: imagenUrl }]);
+          .insert([{ nombre, precio, stock, categoria, vehiculo, descripcion, imagen_url: imagenUrl }]);
 
         if (dbError) throw dbError;
 
@@ -204,7 +214,7 @@
       }
     });
 
-    // 📋 Mostrar lista en el Panel Admin
+    // Mostrar lista en el Panel Admin
     async function cargarProductos() {
       const { data, error } = await db.from('productos').select('*').order('id', { ascending: false });
 
@@ -218,18 +228,18 @@
         const item = document.createElement('div');
         item.className = 'product-item';
         
+        const iconoVehiculo = prod.vehiculo === 'moto' ? '🏍️' : (prod.vehiculo === 'carro' ? '🚗' : '🔄');
         const precioTxt = `Q${parseFloat(prod.precio).toFixed(2)}`;
         const estadoTxt = prod.stock > 0 
           ? `<span style="color:#2a9d8f; font-weight:bold;">${prod.stock} unids.</span>` 
           : `<span style="color:#e63946; font-weight:bold;">Agotado</span>`;
 
-        // Nombre escapado para evitar errores si tiene comillas en el título
         const nombreEscapado = prod.nombre.replace(/'/g, "\\'");
 
         item.innerHTML = `
           <img src="${prod.imagen_url}" alt="${prod.nombre}">
           <div style="flex:1;">
-            <strong>${prod.nombre}</strong><br>
+            <strong>${prod.nombre} ${iconoVehiculo}</strong><br>
             <small>${precioTxt} | ${estadoTxt}</small>
             <!-- BOTONERA RÁPIDA DE STOCK -->
             <div style="margin-top: 5px;">
@@ -255,7 +265,7 @@
       if (!error) cargarProductos();
     }
 
-    // 🗑️ Borrar producto
+    // Borrar producto
     async function eliminarProducto(id) {
       if (confirm("¿Estás seguro de eliminar este producto?")) {
         const { error } = await db.from('productos').delete().eq('id', id);
@@ -267,7 +277,7 @@
       }
     }
 
-    // ✏️ EDITAR PRECIO EN SUPABASE
+    // EDITAR PRECIO EN SUPABASE
     async function editarPrecio(idActual, nombreActual, precioActual) {
       const nuevoPrecio = prompt(`Ingresá el nuevo precio para "${nombreActual}":`, precioActual);
 
@@ -287,7 +297,7 @@
           alert("Error al actualizar el precio: " + error.message);
         } else {
           alert(`¡Éxito! El precio de "${nombreActual}" cambió a Q${precioParseado.toFixed(2)}.`);
-          cargarProductos(); // Vuelve a pintar la lista al instante con el nuevo precio
+          cargarProductos();
         }
       }
     }
