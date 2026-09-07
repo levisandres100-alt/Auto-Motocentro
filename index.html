@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auto-Motocentro</title>
+    <link rel="stylesheet" href="estilos.css">
     
     <!-- SCRIPT ANTI-PARPADEO (Lee el tema antes de renderizar la página) -->
     <script>
@@ -362,20 +363,40 @@ html:not(.theme-light) .card-producto h4 {
     <div class="sidebar-section">
       <h4>Categorías</h4>
       <ul class="sidebar-menu">
-        <li><a href="index.html">🏠 Inicio / Todos</a></li>
-         <li><a href="categoria.html">📋 Categorías</a></li>
+        <li><a href="index.html">🏠 Inicio</a></li>
+           <h4>-------------------------</h4>
+        
+        <!-- SECCIÓN CARROS -->
+    <div class="sidebar-section">
+      <h4>🚗 Repuestos para Carro</h4>
+      <ul class="sidebar-menu">
+        <li><a href="categorias.html">📋 Categorías Carro</a></li>
         <li><a href="aceitesylubricantes.html">🛢️ Aceites y Lubricantes</a></li>
         <li><a href="sistemasdefrenos.html">🛞 Sistemas de Frenos</a></li>
         <li><a href="motorydistribuicion.html">🏎️ Motor y Distribución</a></li>
-        <li><a href="suspensionyshocks.html">🛻 Suspensión y Shocks</a></li>
+        <li><a href="suspensionyshocks.html">🚗 Suspensión y Shocks</a></li>
         <li><a href="baterias.html">🔋 Baterías</a></li>
-        <!-- Agregá las demás categorías que tengás aquí -->
       </ul>
     </div>
 
     <hr class="sidebar-divider">
 
-    <!-- SECCIÓN DE PREFERENCIAS / TEMAS -->
+    <!-- SECCIÓN MOTOS -->
+    <div class="sidebar-section">
+      <h4>🏍️ Repuestos para Moto</h4>
+      <ul class="sidebar-menu">
+        <li><a href="categoriasm.html">📋 Categorías Moto</a></li>
+        <li><a href="aceitesylubricantesm.html">🛢️ Aceites y Lubricantes</a></li>
+        <li><a href="sistemasdefrenosm.html">🛞 Sistemas de Frenos</a></li>
+        <li><a href="motorydistribuicionm.html">🏎️ Motor y Distribución</a></li>
+        <li><a href="suspensionyshocksm.html">🏍️ Suspensión y Shocks</a></li>
+        <li><a href="bateriasm.html">🔋 Baterías</a></li>
+      </ul>
+    </div>
+
+    <hr class="sidebar-divider">
+
+    <!-- SECCIÓN APARIENCIA (TEMAS) -->
     <div class="sidebar-section">
       <h4>Apariencia</h4>
       <p class="theme-subtitle">Seleccioná un tema:</p>
@@ -386,9 +407,10 @@ html:not(.theme-light) .card-producto h4 {
         <button class="btn-theme theme-blue" onclick="setTheme('blue')">🌊 Azul</button>
       </div>
     </div>
+
   </div>
 </aside>
-    
+  
 <script>
   // Control de apertura y cierre del panel lateral
   const openBtn = document.getElementById('btn-open-sidebar');

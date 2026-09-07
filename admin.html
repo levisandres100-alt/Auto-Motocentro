@@ -4,8 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Administración - Auto-Motocentro</title>
+  <link rel="stylesheet" href="estilos.css">
+  
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
   <style>
     :root {
       --primary: #ffd711;
@@ -20,14 +23,14 @@
     .form-group { margin-bottom: 15px; }
     label { display: block; font-weight: bold; margin-bottom: 5px; color: var(--dark); }
     input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
-    button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-    button:hover { background: #c1121f; }
-    .btn-logout { background: #6c757d; margin-bottom: 20px; }
+    button { width: 100%; padding: 12px; background: var(--primary); color: #000; border: none; border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+    button:hover { opacity: 0.85; }
+    .btn-logout { background: #6c757d; color: white; margin-bottom: 20px; }
     .hidden { display: none; }
     .product-list { margin-top: 30px; }
     .product-item { display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 10px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ddd; gap: 10px; }
     .product-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; }
-    .btn-delete { background: #e63946; width: auto; padding: 6px 12px; font-size: 14px; margin-top: 0; }
+    .btn-delete { background: #e63946; color: white; width: auto; padding: 6px 12px; font-size: 14px; margin-top: 0; }
     .btn-edit { background: #ffb703; color: #000; width: auto; padding: 6px 10px; font-size: 12px; margin-top: 0; font-weight: bold; }
   </style>
 </head>
@@ -73,22 +76,22 @@
         </div>
 
         <div class="form-group">
-          <label>Categoría:</label>
+          <label>Categoría y Vehículo:</label>
           <select id="prodCategoria" required>
-            <option value="aceitesylubricantes">Aceites y Lubricantes</option>
-            <option value="sistemadefrenos">Sistema de Frenos</option>
-            <option value="motorydistribuicion">Motor y Distribución</option>
-            <option value="suspensionyshocks">Suspensión y Shocks</option>
-            <option value="baterias">Baterías</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Tipo de Vehículo / Aplica para:</label>
-          <select id="prodVehiculo" required>
-            <option value="carro">🚗 Automóvil / Carro</option>
-            <option value="moto">🏍️ Motocicleta</option>
-            <option value="ambos">🔄 Ambos / Universal</option>
+            <optgroup label="Carros 🚗">
+              <option value="aceitesylubricantes">Aceites y Lubricantes (Carros)</option>
+              <option value="sistemadefrenos">Sistema de Frenos (Carros)</option>
+              <option value="motorydistribuicion">Motor y Distribución (Carros)</option>
+              <option value="suspensionyshocks">Suspensión y Shocks (Carros)</option>
+              <option value="baterias">Baterías (Carros)</option>
+            </optgroup>
+            <optgroup label="Motos 🏍️">
+              <option value="aceitesylubricantesm">Aceites y Lubricantes (Motos)</option>
+              <option value="sistemadefrenosm">Sistema de Frenos (Motos)</option>
+              <option value="motorydistribuicionm">Motor y Distribución (Motos)</option>
+              <option value="suspensionyshocksm">Suspensión y Shocks (Motos)</option>
+              <option value="bateriasm">Baterías (Motos)</option>
+            </optgroup>
           </select>
         </div>
 
@@ -106,15 +109,40 @@
       </form>
 
       <!-- LISTA DE PRODUCTOS SUBIDOS -->
+    
       <div class="product-list">
         <h2>📋 Productos en la Web</h2>
+
+        <!-- FILTRADOR DE CATEGORÍAS -->
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label for="filtroCategoria">Filtrar por categoría:</label>
+          <select id="filtroCategoria" onchange="cargarProductos()">
+            <option value="todas">Ver todas las categorías</option>
+            <optgroup label="Carros 🚗">
+              <option value="aceitesylubricantes">Aceites y Lubricantes (Carros)</option>
+              <option value="sistemadefrenos">Sistema de Frenos (Carros)</option>
+              <option value="motorydistribuicion">Motor y Distribución (Carros)</option>
+              <option value="suspensionyshocks">Suspensión y Shocks (Carros)</option>
+              <option value="baterias">Baterías (Carros)</option>
+            </optgroup>
+            <optgroup label="Motos 🏍️">
+              <option value="aceitesylubricantesm">Aceites y Lubricantes (Motos)</option>
+              <option value="sistemadefrenosm">Sistema de Frenos (Motos)</option>
+              <option value="motorydistribuicionm">Motor y Distribución (Motos)</option>
+              <option value="suspensionyshocksm">Suspensión y Shocks (Motos)</option>
+              <option value="bateriasm">Baterías (Motos)</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div id="listaProductos">Cargando productos...</div>
+      </div>
         <div id="listaProductos">Cargando productos...</div>
       </div>
     </div>
   </div>
 
   <script>
-    // DATOS DE SUPABASE 
     const SUPABASE_URL = "https://exsegshoihdoofefjryt.supabase.co"; 
     const SUPABASE_ANON_KEY = "sb_publishable_bN19uH5ODfBYvVTnW0oE7g_cFUqMaRN"; 
 
@@ -173,7 +201,6 @@
       const precio = parseFloat(document.getElementById('prodPrecio').value);
       const stock = parseInt(document.getElementById('prodStock').value);
       const categoria = document.getElementById('prodCategoria').value;
-      const vehiculo = document.getElementById('prodVehiculo').value;
       const descripcion = document.getElementById('prodDescripcion').value;
       const fileInput = document.getElementById('prodImagen');
       const file = fileInput.files[0];
@@ -195,7 +222,11 @@
 
         const imagenUrl = urlData.publicUrl;
 
-        // Insertar en la tabla 'productos' (se agregó la columna vehiculo)
+        // Determinar el icono según si la categoría es de Moto (termina en 'm') o Carro
+        const esMoto = categoria.endsWith('m');
+        const vehiculo = esMoto ? 'moto' : 'carro';
+
+        // Insertar en la tabla 'productos'
         const { error: dbError } = await db
           .from('productos')
           .insert([{ nombre, precio, stock, categoria, vehiculo, descripcion, imagen_url: imagenUrl }]);
@@ -214,12 +245,29 @@
       }
     });
 
-    // Mostrar lista en el Panel Admin
+   // Mostrar lista en el Panel Admin (Con filtro aplicado)
     async function cargarProductos() {
-      const { data, error } = await db.from('productos').select('*').order('id', { ascending: false });
+      const filtro = document.getElementById('filtroCategoria')?.value || 'todas';
+      listaProductos.innerHTML = "<p style='text-align:center;'>Cargando productos...</p>";
+
+      // Preparar consulta a Supabase
+      let query = db.from('productos').select('*');
+
+      // Si el usuario eligió una categoría en específico, filtramos por esa columna
+      if (filtro !== 'todas') {
+        query = query.eq('categoria', filtro);
+      }
+
+      // Ordenar los más recientes primero
+      const { data, error } = await query.order('id', { ascending: false });
 
       if (error) {
         listaProductos.innerHTML = "Error al cargar productos.";
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        listaProductos.innerHTML = "<p style='text-align:center; color:#666;'>No hay productos en esta categoría.</p>";
         return;
       }
 
@@ -228,7 +276,7 @@
         const item = document.createElement('div');
         item.className = 'product-item';
         
-        const iconoVehiculo = prod.vehiculo === 'moto' ? '🏍️' : (prod.vehiculo === 'carro' ? '🚗' : '🔄');
+        const iconoVehiculo = (prod.categoria && prod.categoria.endsWith('m')) || prod.vehiculo === 'moto' ? '🏍️' : '🚗';
         const precioTxt = `Q${parseFloat(prod.precio).toFixed(2)}`;
         const estadoTxt = prod.stock > 0 
           ? `<span style="color:#2a9d8f; font-weight:bold;">${prod.stock} unids.</span>` 
@@ -243,8 +291,8 @@
             <small>${precioTxt} | ${estadoTxt}</small>
             <!-- BOTONERA RÁPIDA DE STOCK -->
             <div style="margin-top: 5px;">
-              <button onclick="cambiarStock(${prod.id}, ${prod.stock}, -1)" style="width:auto; padding: 2px 8px; font-size:12px; background:#457b9d; margin-top:0;">-1</button>
-              <button onclick="cambiarStock(${prod.id}, ${prod.stock}, 1)" style="width:auto; padding: 2px 8px; font-size:12px; background:#2a9d8f; margin-top:0;">+1</button>
+              <button onclick="cambiarStock(${prod.id}, ${prod.stock}, -1)" style="width:auto; padding: 2px 8px; font-size:12px; background:#457b9d; margin-top:0; color:white;">-1</button>
+              <button onclick="cambiarStock(${prod.id}, ${prod.stock}, 1)" style="width:auto; padding: 2px 8px; font-size:12px; background:#2a9d8f; margin-top:0; color:white;">+1</button>
             </div>
           </div>
           
@@ -257,8 +305,7 @@
         listaProductos.appendChild(item);
       });
     }
-
-    // Función para sumar o restar stock en Supabase
+    // Cambiar stock
     async function cambiarStock(id, stockActual, cambio) {
       const nuevoStock = Math.max(0, stockActual + cambio);
       const { error } = await db.from('productos').update({ stock: nuevoStock }).eq('id', id);
@@ -277,7 +324,7 @@
       }
     }
 
-    // EDITAR PRECIO EN SUPABASE
+    // Editar precio
     async function editarPrecio(idActual, nombreActual, precioActual) {
       const nuevoPrecio = prompt(`Ingresá el nuevo precio para "${nombreActual}":`, precioActual);
 
